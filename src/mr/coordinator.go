@@ -67,6 +67,25 @@ func (c *Coordinator) AssignWork(args *TaskArgs, reply *ExampleReply) error {
 	return nil
 }
 
+func (c *Coordinator) SaveReduceOutput(args *ReduceOutputArgs, _ *struct{}) error {
+    c.mu.Lock()
+    defer c.mu.Unlock()
+
+    filename := fmt.Sprintf("mr-out-%d.json", args.ReduceNumber)
+    file, err := os.Create(filename)
+    if err != nil {
+        log.Printf("Failed to create output file %v: %v", filename, err)
+        return err
+    }
+    defer file.Close()
+
+    for key, value := range args.Output {
+        fmt.Fprintf(file, "%v %v\n", key, value)
+    }
+
+    return nil
+}
+
 func (c *Coordinator) ReportCompletion(args *ReportCompletionArgs, _ *struct{}) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -137,10 +156,10 @@ func (c *Coordinator) monitorTasks() {
 func (c *Coordinator) server() {
 	rpc.Register(c)
 	rpc.HandleHTTP()
-	//l, e := net.Listen("tcp", ":1234")
-	sockname := coordinatorSock()
-	os.Remove(sockname)
-	l, e := net.Listen("unix", sockname)
+	l, e := net.Listen("tcp", ":1234")
+	//sockname := coordinatorSock()
+	//os.Remove(sockname)
+	//l, e := net.Listen("unix", sockname)
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}
