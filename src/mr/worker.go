@@ -30,13 +30,12 @@ func Worker(mapf func(string, string) []KeyValue,
 	reducef func(string, []string) string) {
 
 	for {
-		if !call("Coordinator.Ping", nil, nil) {
-        		log.Fatalf("Coordinator is unreachable.")
-    		}
 		task := ExampleReply{}
 		ok := call("Coordinator.AssignWork", &TaskArgs{}, &task)
 		if !ok {
-			log.Fatalf("Worker failed to connect to coordinator")
+			log.Printf("Retrying to connect to the coordinator...")
+        		time.Sleep(2 * time.Second)
+        		continue
 		}
 
 		switch task.TaskType {
