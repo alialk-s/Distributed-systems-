@@ -68,10 +68,12 @@ func (c *Coordinator) AssignWork(args *TaskArgs, reply *ExampleReply) error {
 	return nil
 }
 
+/*
 //To check if the coordinator is alive
 func (c *Coordinator) Ping(_ *struct{}, _ *struct{}) error {
     return nil
 }
+*/
 
 func (c *Coordinator) SaveReduceOutput(args *ReduceOutputArgs, _ *struct{}) error {
     c.mu.Lock()
